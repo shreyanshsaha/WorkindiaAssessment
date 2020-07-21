@@ -174,7 +174,7 @@ app.post("/app/user/auth", validateUserCredentials, async function (req, res) {
   // get details from DB
   let userDetails = await getUserDetails(user.username);
 
-  if (userDetails == undefined || user.password != userDetails[0].password)
+  if (userDetails == undefined || userDetails.length ==0 || user.password != userDetails[0].password)
     return res.status(404).send("Error: Username or password invalid!");
 
   // store details in session
