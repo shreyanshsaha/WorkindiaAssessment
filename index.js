@@ -145,6 +145,7 @@ app.post("/app/user", validateUserCredentials, async function (req, res) {
   const user = {
     username: req.body.username,
     password: hashPassword(req.body.password),
+    sessionId: req.sessionID
   }
 
   try {
