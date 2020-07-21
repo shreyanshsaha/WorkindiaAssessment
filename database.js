@@ -1,9 +1,9 @@
 let mysql = require('mysql');
 let config = require('./config.js');
-const { reject } = require('lodash');
 
 
 
+// Add new user
 function AddUser(data) {
   let connection = mysql.createConnection(config);
   return new Promise((resolve, reject) => {
@@ -18,6 +18,7 @@ function AddUser(data) {
   });
 }
 
+// Get username and password
 function getUserDetails(data) {
   return new Promise((resolve, reject) => {
     let connection = mysql.createConnection(config);
@@ -29,6 +30,7 @@ function getUserDetails(data) {
   });
 }
 
+// Get user websites
 function GetUserWebsites(data) {
   return new Promise((resolve, reject) => {
     let connection = mysql.createConnection(config);
@@ -40,6 +42,7 @@ function GetUserWebsites(data) {
   });
 }
 
+// Add a new website
 function AddWebsite(data) {
   return new Promise((resolve, reject) => {
     let connection = mysql.createConnection(config);
