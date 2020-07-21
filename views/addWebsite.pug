@@ -1,0 +1,26 @@
+html
+  head
+    title Password Manager    
+    script(src='https://code.jquery.com/jquery-3.1.1.min.js', crossorigin='anonymous')
+    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css", integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk", crossorigin="anonymous")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js", integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI", crossorigin="anonymous")
+    link(rel='stylesheet', href='/style.css')
+  body
+    include partials/navbar
+    .container.custom-form
+      h3 Add new Website
+      hr
+      .form-group
+        h4.label(for='website') Website Name
+        input#website.form-control(type='text', placeholder='Website Name')
+
+      .form-group
+        h5.label(for='username') Username
+        input#username.form-control(type='text', placeholder='Username')
+        
+      .form-group
+        h5.label(for='password') Password
+        input#password.form-control(type='password', aria-describedby='passwordHelp', placeholder='Password')
+        small#passwordHelp.form-text.text-muted Your password always remains encrypted with the master password
+
+      button.btn.btn-success(type='submit') Submit

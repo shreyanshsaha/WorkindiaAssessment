@@ -22,6 +22,9 @@ const SESSION_SECRETKEY = "workindiaSecretpassword@#123"
 
 var app = express()
 
+app.set("view engine", "pug");
+app.set("views", "./views");
+
 // SESSION
 app.use(session({
   secret: 'ssshhhhh', saveUninitialized: true, resave: true, genid: function (req) {
@@ -29,6 +32,8 @@ app.use(session({
     return crypto.createHash('sha256').update(uuid.v1()).update(crypto.randomBytes(256)).digest("hex");
   },
 }));
+
+app.use(express.static('public'));
 
 // SESSION with cookie
 // app.use(session({
@@ -140,6 +145,10 @@ function isAuthenticated(req, res, next) {
 // ROUTES
 // ======
 
+app.get("/", function(req, res){
+  return res.render('dashboard');
+})
+
 // create new user
 app.post("/app/user", validateUserCredentials, async function (req, res) {
   const user = {
@@ -240,8 +249,18 @@ app.get("/logout", function (req, res) {
   })
 })
 
+app.get("/login", function(req, res){
+  res.render("login");
+})
+
+app.get("/app/sites", function(req, res){
+  return res.render("addWebsite");
+})
+
 
 // run server
 app.listen(3000, function () {
   console.log("Server running");
 })
+
+

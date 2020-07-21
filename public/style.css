@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap");
+
+.custom-form {
+  /* border: 1px solid red; */
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  margin-top: 40px;
+  padding: 30px;
+  border-radius: 5px;
+  -webkit-box-shadow: 17px 22px 33px -27px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 17px 22px 33px -27px rgba(0, 0, 0, 0.75);
+  box-shadow: 17px 22px 33px -27px rgba(0, 0, 0, 0.75);
+}
+
+.custom-card {
+  /* border:1px solid red; */
+  -webkit-box-shadow: 22px 33px 34px -28px rgba(34, 34, 34, 0.28);
+  -moz-box-shadow: 22px 33px 34px -28px rgba(34, 34, 34, 0.28);
+  box-shadow: 22px 33px 34px -28px rgba(34, 34, 34, 0.28);
+  border-radius: 25px;
+}
+
+.custom-navbar {
+  color: black;
+  -webkit-box-shadow: 0px -15px 20px 10px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px -15px 20px 10px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px -15px 20px 10px rgba(0, 0, 0, 0.75);
+}
+
+.navbar-brand {
+  font-family: "Merriweather", serif;
+}
