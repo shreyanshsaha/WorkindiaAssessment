@@ -1,6 +1,5 @@
 const express = require("express");
 const joi = require("joi");
-const mysql = require("mysql");
 const bodyParser = require('body-parser')
 const session = require("express-session");
 const crypto = require("crypto");
@@ -14,16 +13,24 @@ const {
   AddWebsite,
 } = require("./database");
 
+
+
+// CONSTANTS
 const SECRETKEY = "245428ABF89C89E";
 const SESSION_SECRETKEY = "workindiaSecretpassword@#123"
+
+
 var app = express()
 
+// SESSION
 app.use(session({
   secret: 'ssshhhhh', saveUninitialized: true, resave: true, genid: function (req) {
     // return uuid.v1();
     return crypto.createHash('sha256').update(uuid.v1()).update(crypto.randomBytes(256)).digest("hex");
   },
 }));
+
+// SESSION with cookie
 // app.use(session({
 //   secret: SESSION_SECRETKEY,
 //   resave: true,
@@ -41,8 +48,15 @@ app.use(session({
 //   },
 // }));
 
+
 app.use(bodyParser.urlencoded({ extended: false }))
 
+
+// ================
+// HELPER FUNCTIONS
+// ================
+
+// master password is stored as hash in database
 function hashPassword(password) {
   let md5sum = crypto.createHash('md5');
   let hashPass = md5sum.update(password).digest("hex");
@@ -65,7 +79,9 @@ function decryptWebsitePassword(encPassword, masterPassword) {
   return mystr;
 }
 
-// middleware
+// ===========
+// MIDDLEWARES
+// ===========
 function validateUserCredentials(req, res, next) {
   const userValidator = joi.object({
     username: joi.string().alphanum().min(6).max(255).required(),
@@ -92,6 +108,7 @@ app.use((req, res, next) => {
   next()
 })
 
+// check is website data is valid
 function validateWebsiteData(req, res, next) {
   const websiteValidator = joi.object({
     website: joi.string().pattern(new RegExp("^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$")).required(),
@@ -105,21 +122,23 @@ function validateWebsiteData(req, res, next) {
   })
 
   if (error)
-  return res.status(400).send("Error: Invalid data");
+    return res.status(400).send("Error: Invalid data");
 
   next();
 }
-// TODO: Complete this
+
+// check if user is authenticated
 function isAuthenticated(req, res, next) {
-  console.log("AUTH:");
   if (req.session != undefined && req.session.user != undefined) {
-    console.log(req.session);
-    console.log(req.session.user);
-    console.log("NEXT");
     return next();
   }
   return res.status(401).send("Unauthorized!");
 }
+
+
+// ======
+// ROUTES
+// ======
 
 // create new user
 app.post("/app/user", validateUserCredentials, async function (req, res) {
@@ -127,8 +146,6 @@ app.post("/app/user", validateUserCredentials, async function (req, res) {
     username: req.body.username,
     password: hashPassword(req.body.password),
   }
-
-  console.log(user);
 
   try {
     await AddUser([user.username, user.password]);
@@ -138,11 +155,7 @@ app.post("/app/user", validateUserCredentials, async function (req, res) {
     return res.status(500).send(err);
   }
 
-  // TODO: CALL mysql
-
   req.session.user = user;
-
-  console.log(req.session);
 
   return res.status(200).json({ success: "account created" });
 });
@@ -150,21 +163,20 @@ app.post("/app/user", validateUserCredentials, async function (req, res) {
 // authenticate user
 app.post("/app/user/auth", validateUserCredentials, async function (req, res) {
 
-  // hash the password
-
+  // hash the password and create a new session ID
   let user = {
     username: req.body.username,
     password: hashPassword(req.body.password),
     sessionId: req.sessionID,
   }
 
-
+  // get details from DB
   let userDetails = await getUserDetails(user.username);
 
   if (userDetails == undefined || user.password != userDetails[0].password)
     return res.status(404).send("Error: Username or password invalid!");
 
-  // req.session.user = user;
+  // store details in session
   req.session.user = user;
   return res.status(200).json({
     status: 'success',
@@ -172,14 +184,20 @@ app.post("/app/user/auth", validateUserCredentials, async function (req, res) {
   });
 });
 
+// get list of user websites
 app.get("/app/sites/list", isAuthenticated, async function (req, res) {
+  if (req.query.userId==undefined || req.query.userId.length == 0)
+    return res.status(400).send("UserID cannot be empty!");
+
   if (req.query.userId != req.session.user.sessionId)
     return res.status(401).send("UserId and session dont match!");
 
-  // TODO: get list from mysql
+  // get list from mysql
   let list = await GetUserWebsites(req.session.user.username);
   list = list[0]
-  for(let i=0; i<list.length; i++){
+
+  // decrypt passwords
+  for (let i = 0; i < list.length; i++) {
     console.log(list[i]);
     list[i].password = decryptWebsitePassword(list[i].password, req.session.user.password);
   }
@@ -188,20 +206,24 @@ app.get("/app/sites/list", isAuthenticated, async function (req, res) {
 });
 
 app.post("/app/sites", isAuthenticated, validateWebsiteData, async function (req, res) {
+  if (req.query.userId==undefined || req.query.userId.length == 0)
+    return res.status(400).send("UserID cannot be empty!");
+
   if (req.query.userId != req.session.user.sessionId)
     return res.status(401).send("UserId and session dont match!!");
 
+  // encrypt password
   const data = {
     website: req.body.website,
     username: req.body.username,
     password: encryptWebsitePassword(req.body.password, req.session.user.password),
   }
 
-  console.log(data);
-  try{
+  try {
+    // store into db
     await AddWebsite([data.website, data.username, data.password, req.session.user.username]);
   }
-  catch(err){
+  catch (err) {
     console.log(err);
     return res.status(500).json(toString(err));
   }
@@ -209,7 +231,7 @@ app.post("/app/sites", isAuthenticated, validateWebsiteData, async function (req
   return res.status(200).json({ status: 'success' })
 });
 
-
+// logout and destroy session
 app.get("/logout", function (req, res) {
   req.session.destroy(function (err) {
     if (err) console.log(err);
@@ -217,6 +239,8 @@ app.get("/logout", function (req, res) {
   })
 })
 
+
+// run server
 app.listen(3000, function () {
   console.log("Server running");
 })
