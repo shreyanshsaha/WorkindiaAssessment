@@ -3,6 +3,8 @@
 
 ```npm install```
 
-# Execute
+# Execution
 ```npm start```
+
+Server will run at localhost:300
 
